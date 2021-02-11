@@ -4,11 +4,15 @@ __lua__
 -- ruby vs all
 -- by jojos
 
+#include tools.lua
+
 function _init()
- sp_ruby={1,2}
+ sp_ruby={1,2,3}
  sp_js=5
  sp_sw=6
  sp_bullet=16
+
+ init_sprites()
 
  init_stars()
  init_player()
@@ -27,64 +31,64 @@ function _update60()
  update_player()
  update_enemies()
  update_explosions()
+
+ update_sprites()
 end
 
 function _draw()
  cls(0)
  
  draw_stars()
- draw_bullets()
- draw_enemies()
- draw_player()
+ draw_sprites()
  draw_explosions()
 
--- draw_score() 
+ draw_score()
 end
 
 function draw_score()
- print("score "..p.s,7)
-end
-
--- utils
-
-function collide(sp1,sp2)
- return sp1.x < sp2.x+8
- and sp1.x+8 > sp2.x
- and sp1.y < sp2.y+8
- and sp1.y+8 > sp2.y
+ print("score "..player.score,7)
 end
 
 -->8
 -- player
 
 function init_player()
- p={
-  x=128/2-8,
-  y=100,
-  sp=sp_ruby[1],
-  t=1,
-  tv=0.1,
-  f=0,
-  fv=0.2,
-  s=0
- }
+ player=build_sprite()
+
+ player.x=128/2-8
+ player.y=100
+ player.dx=player.x
+ player.dy=player.y
+ player.f=0 -- fire
+ player.fv=0.2 -- fire vel
+ player.score=0
+
+ -- idle anim
+ local anim=build_anim()
+ anim.v=0.1
+ anim_add_frame(anim,sp_ruby[1])
+ anim_add_frame(anim,sp_ruby[2])
+ anim_add_frame(anim,sp_ruby[3])
+ player.anims[1]=anim
+
+ add_sprite(player)
 end
 
 function update_player()
- local nx=p.x
- local ny=p.y
+ local nx=player.x
+ local ny=player.y
  
- p.f=max(0,p.f-p.fv)
+ player.f=max(0,player.f-player.fv)
  
  -- spawn enemy for debug
  if btnp(🅾️) then
   spawn_enemy()
  end
  
- if btn(❎) and p.f==0 then
+ if btn(❎) and player.f==0 then
   fire()
   sfx(0)
-  p.f=1
+  player.f=1
  end
  if btn(⬅️) then
   nx-=1
@@ -99,13 +103,10 @@ function update_player()
   ny+=1
  end
  
- p.x=mid(0,nx,128-8)
- p.y=mid(0,ny,128-8)
+ player.x=mid(0,nx,128-8)
+ player.y=mid(0,ny,128-8)
 end
 
-function draw_player()
- spr(p.sp,p.x,p.y)
-end
 -->8
 -- bullets
 
@@ -121,27 +122,30 @@ function update_bullets()
   if b.x<0 or b.x>128
   or b.y<0 or b.y>128
   then
-   del(bullets,b)
+   remove_bullet(b)
   end
  end
 end
 
-function draw_bullets()
- for b in all(bullets) do
-  spr(b.sp,b.x,b.y)
- end
+function remove_bullet(b)
+ del(bullets,b)
+ remove_sprite(b)
 end
 
 function fire()
- local b={
-  sp=sp_bullet,
-  x=p.x,
-  y=p.y,
-  vx=0,
-  vy=-3,
-  d=1
- }
- 
+ local b=build_sprite()
+
+ b.x=player.x
+ b.y=player.y
+ b.vx=0
+ b.vy=-3
+ b.damage=1
+
+ local anim=build_anim()
+ anim_add_frame(anim,sp_bullet)
+ b.anims[1]=anim
+
+ add_sprite(b)
  add(bullets,b)
 end
 -->8
@@ -150,8 +154,8 @@ end
 function init_enemies()
  enemies={}
  e_prop={
-  js={sp=sp_js,l=4,s=1},
-  sw={sp=sp_sw,l=6,s=2},
+  js={sp=sp_js,life=4,score=1},
+  sw={sp=sp_sw,life=6,score=2},
  }
 end
 
@@ -164,43 +168,47 @@ function spawn_enemy()
   et=e_prop.sw
  end
  
- local e={
-  sp=et.sp,
-  x=rnd(128),
-  y=0,
-  l=et.l,
-  s=et.s
- }
+ local e=build_sprite()
+
+ e.x=rnd(128)
+ e.y=0
+ e.dx=e.x
+ e.dy=e.y
+ e.life=et.life
+ e.score=et.score
+
+ local anim=build_anim()
+ anim_add_frame(anim,et.sp)
+ e.anims[1]=anim
  
+ add_sprite(e)
  add(enemies, e)
 end
 
 function update_enemies()
  -- enemy is alive
  for e in all(enemies) do
-   
   -- hit bullets
   for b in all(bullets) do
-   if collide(b,e) then
+   if sprites_collide(b,e) then
     sfx(1)
-    e.l-=b.d
-    del(bullets,b)
+    e.life-=b.damage
+    remove_bullet(b)
    end
   end
 
-  if e.l<=0 then
+  if e.life<=0 then
    sfx(2)
-   explode(e.x+8/2,e.y+8/2)
-   del(enemies, e)
-   p.s+=e.s
+   explode(e.x+e.w/2,e.y+e.h/2)
+   remove_enemy(e)
+   player.score+=e.score
   end
  end
 end
 
-function draw_enemies()
- for e in all(enemies) do
-  spr(e.sp,e.x,e.y)
- end
+function remove_enemy(e)
+ del(enemies, e)
+ remove_sprite(e)
 end
 -->8
 -- stars
@@ -321,13 +329,13 @@ function explode(x,y)
 end
 __gfx__
 00000000000000000000000000000000000000005555500000007000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000088888800888888000000000000000000050000000700070000000000000000000000000000000000000000000000000000000000000000000000000
-007007008e888ee88888888800000000000000000050555507777777000000000000000000000000000000000000000000000000000000000000000000000000
-000770008ee888888888888800000000000000000050500077777700000000000000000000000000000000000000000000000000000000000000000000000000
-0007700008ee8ee00888888000000000000000005550555577777700000000000000000000000000000000000000000000000000000000000000000000000000
-007007000888ee800888888000000000000000000000000577777777000000000000000000000000000000000000000000000000000000000000000000000000
-00000000008888000088880000000000000000000000555507777770000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000880000008800000000000000000000000000000777700000000000000000000000000000000000000000000000000000000000000000000000000
+00000000088888800888888008888880000000000050000000700070000000000000000000000000000000000000000000000000000000000000000000000000
+007007008e8888888e888ee88e888ee8000000000050555507777777000000000000000000000000000000000000000000000000000000000000000000000000
+00077000888888888e8888888ee88888000000000050500077777700000000000000000000000000000000000000000000000000000000000000000000000000
+0007700008e888e008ee88e008ee8ee0000000005550555577777700000000000000000000000000000000000000000000000000000000000000000000000000
+007007000888e8800888ee800888ee80000000000000000577777777000000000000000000000000000000000000000000000000000000000000000000000000
+00000000008888000088880000888800000000000000555507777770000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000880000008800000088000000000000000000000777700000000000000000000000000000000000000000000000000000000000000000000000000
 00033000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00033000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00033000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
