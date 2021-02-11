@@ -156,35 +156,41 @@ function init_enemies()
  sp_ph=7
 
  e_prop={
-  ph={
-   sp=7,
-   v=0.75,
-   life=1,
-   score=1,
-   freq=0.75
+  {
+   n="swift",
+   sp=6,
+   v=0.35,
+   life=6,
+   score=10,
+   freq=0.25
   },
-  js={
+  {
+   n="js",
    sp=5,
    v=0.50,
    life=4,
    score=5,
    freq=0.50
   },
-  sw={
-   sp=6,
-   v=0.35,
-   life=6,
-   score=10,
-   freq=0.25
+  {
+   n="php",
+   sp=7,
+   v=0.75,
+   life=1,
+   score=1,
+   freq=0.75
   }
  }
 end
 
 function spawn_enemy()
- local et=e_prop.sw
+ local et=e_prop[#e_prop]
  
  local rng=rnd(100)/100
- for k,v in pairs(e_prop) do
+ printh("")
+ printh("rng: "..rng)
+ for v in all(e_prop) do
+  printh(v.n..": "..v.freq)
   if v.freq > rng then
    et=v
    break
