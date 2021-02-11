@@ -79,9 +79,9 @@ function update_player()
  player.f=max(0,player.f-player.fv)
  
  -- spawn enemy for debug
- if btnp(🅾️) then
-  spawn_enemy()
- end
+ -- if btnp(🅾️) then
+ --  spawn_enemy()
+ -- end
  
  if btn(❎) and player.f==0 then
   fire()
@@ -151,9 +151,8 @@ end
 
 function init_enemies()
  enemies={}
- sp_js=5
- sp_sw=6
- sp_ph=7
+
+ max_enemies=15
 
  e_prop={
   {
@@ -187,10 +186,7 @@ function spawn_enemy()
  local et=e_prop[#e_prop]
  
  local rng=rnd(100)/100
- printh("")
- printh("rng: "..rng)
  for v in all(e_prop) do
-  printh(v.n..": "..v.freq)
   if v.freq > rng then
    et=v
    break
@@ -214,6 +210,11 @@ function spawn_enemy()
 end
 
 function update_enemies()
+ -- need to spawn enemy?
+ if #enemies<max_enemies and ticks%30==0 then
+  spawn_enemy()
+ end
+
  for e in all(enemies) do
   -- hit enemy
   for b in all(bullets) do
