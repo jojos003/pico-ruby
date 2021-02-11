@@ -158,18 +158,21 @@ function init_enemies()
  e_prop={
   ph={
    sp=7,
+   v=0.75,
    life=1,
    score=1,
    freq=0.75
   },
   js={
    sp=5,
+   v=0.50,
    life=4,
    score=5,
    freq=0.50
   },
   sw={
    sp=6,
+   v=0.35,
    life=6,
    score=10,
    freq=0.25
@@ -192,10 +195,9 @@ function spawn_enemy()
 
  e.x=rnd(128)
  e.y=0
- e.dx=e.x
- e.dy=e.y
  e.life=et.life
  e.score=et.score
+ e.v=et.v
 
  local anim=build_anim()
  anim_add_frame(anim,et.sp)
@@ -206,9 +208,8 @@ function spawn_enemy()
 end
 
 function update_enemies()
- -- enemy is alive
  for e in all(enemies) do
-  -- hit bullets
+  -- hit enemy
   for b in all(bullets) do
    if sprites_collide(b,e) then
     sfx(1)
@@ -217,11 +218,22 @@ function update_enemies()
    end
   end
 
+  -- kill enemy
   if e.life<=0 then
    sfx(2)
    explode(e.x+e.w/2,e.y+e.h/2)
    remove_enemy(e)
    player.score+=e.score
+  end
+
+  -- move enemy
+  if e.life>0 then
+   e.y+=e.v
+  end
+
+  -- out of map
+  if e.y>128 then
+   remove_enemy(e)
   end
  end
 end
