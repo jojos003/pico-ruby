@@ -7,7 +7,7 @@ __lua__
 #include tools.lua
 
 function _init()
- sp_ruby={1,2,3}
+ sp_ruby={1,2,3,4}
  sp_bullet=16
 
  init_sprites()
@@ -45,6 +45,9 @@ end
 
 function draw_score()
  print("score "..player.score,7)
+ for l=0,player.life-1 do
+  spr(3,l*player.w+l*2,8)
+ end
 end
 
 -->8
@@ -60,6 +63,8 @@ function init_player()
  player.f=0 -- fire
  player.fv=0.2 -- fire vel
  player.score=0
+ player.life=3
+ player.state=1
 
  -- idle anim
  local anim=build_anim()
@@ -68,6 +73,17 @@ function init_player()
  anim_add_frame(anim,sp_ruby[2])
  anim_add_frame(anim,sp_ruby[3])
  player.anims[1]=anim
+
+ -- blink anim
+ local anim=build_anim()
+ anim.v=0.25
+ anim_add_frame(anim,sp_ruby[1])
+ anim_add_frame(anim,sp_ruby[4])
+ anim_add_frame(anim,sp_ruby[2])
+ anim_add_frame(anim,sp_ruby[4])
+ anim_add_frame(anim,sp_ruby[3])
+ anim_add_frame(anim,sp_ruby[4])
+ player.anims[2]=anim
 
  add_sprite(player)
 end
@@ -83,6 +99,14 @@ function update_player()
  --  spawn_enemy()
  -- end
  
+ -- cooldown?
+ if player.state==2 then
+  player.cd-=1 -- decrement cooldown at each tick
+  if player.cd<=0 then
+   sprite_set_state(player,1)
+  end
+ end
+
  if btn(❎) and player.f==0 then
   fire()
   sfx(0)
@@ -103,6 +127,12 @@ function update_player()
  
  player.x=mid(0,nx,128-8)
  player.y=mid(0,ny,128-8)
+end
+
+function player_hit()
+ player.cd=2*60 -- 2s of cooldown ; 60 is fps/s
+ sprite_set_state(player,2)
+ player.life-=1
 end
 
 -->8
@@ -216,7 +246,19 @@ function update_enemies()
  end
 
  for e in all(enemies) do
-  -- hit enemy
+  -- hit by enemy
+  -- only when player not in cooldown
+  if player.state!=2 and sprites_collide(e,player) then
+   sfx(3)
+   explode(e.x+e.w/2,e.y+e.h/2)
+   remove_enemy(e)
+   player_hit()
+
+   -- let some breath
+   break
+  end
+
+  -- bullet hit enemy
   for b in all(bullets) do
    if sprites_collide(b,e) then
     sfx(1)
@@ -381,4 +423,6 @@ __gfx__
 __sfx__
 000100001c7501c7501c7501c7501a75018750177501470014700176001660014600116000f6000e600000002020024200272002920024500275002a5002c5002d50027300263000000000000000000000000000
 000100002615023150211501f1501e1501d1501c15000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000300002365025650286502a6502a65028650226501e6501a650186501664015640126300f6300d6200000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000300002365025650286502a6502a65028650226501e6501a650186501664015640126300f6300d62000000000000000000000000000660008600096000c600106001a000000000000000000000000000000000
+000500000666006660066600566005660056600466004660046400464004630046300363003630036200362003620036100361004600046000060000600006000060000600006000460002600016000000000000
+001000000000000000000002500025000250002500025000250000000025000000002500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
