@@ -336,7 +336,7 @@ function spawn_enemy()
  
  local e=build_sprite()
 
- e.x=rnd(128)
+ e.x=mid(0,rnd(128),128-8)
  e.y=0
  e.life=et.life
  e.score=et.score
