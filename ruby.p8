@@ -7,6 +7,51 @@ __lua__
 #include tools.lua
 
 function _init()
+ ticks=0
+
+ scenes={
+  game={
+   init=init_game,
+   update=update_game,
+   draw=draw_game
+  },
+  over={
+   init=init_over,
+   update=update_over,
+   draw=draw_over
+  }
+ }
+
+ switch_scene("game")
+end
+
+function _update60()
+ ticks+=1
+
+ scenes[current_scene].update()
+end
+
+function _draw()
+ scenes[current_scene].draw()
+end
+
+function draw_score()
+ print("score "..player.score,7)
+ for l=0,player.life-1 do
+  spr(3,l*player.w+l*2,8)
+ end
+end
+
+-->8
+-- scenes
+
+function switch_scene(scene)
+ printh(scene)
+ current_scene=scene
+ scenes[current_scene].init()
+end
+
+function init_game()
  sp_ruby={1,2,3,4}
  sp_bullet=16
 
@@ -17,13 +62,9 @@ function _init()
  init_enemies()
  init_bullets()
  init_explosions()
- 
- ticks=0
 end
 
-function _update60()
- ticks+=1
- 
+function update_game()
  update_stars()
  update_bullets()
  update_player()
@@ -33,7 +74,7 @@ function _update60()
  update_sprites()
 end
 
-function _draw()
+function draw_game()
  cls(0)
  
  draw_stars()
@@ -43,11 +84,21 @@ function _draw()
  draw_score()
 end
 
-function draw_score()
- print("score "..player.score,7)
- for l=0,player.life-1 do
-  spr(3,l*player.w+l*2,8)
+function init_over()
+end
+
+function update_over()
+ if btn(❎) then
+  switch_scene("game")
  end
+end
+
+function draw_over()
+ cls(0)
+ 
+ draw_stars()
+ draw_sprites()
+ draw_explosions()
 end
 
 -->8
@@ -99,6 +150,12 @@ function update_player()
  --  spawn_enemy()
  -- end
  
+ if btnp(🅾️) then
+  if current_scene=="game" then
+   switch_scene("over")
+  end
+ end
+
  -- cooldown?
  if player.state==2 then
   player.cd-=1 -- decrement cooldown at each tick
@@ -130,9 +187,13 @@ function update_player()
 end
 
 function player_hit()
+ sfx(3)
+ explode(player.x+player.w/2,player.y+player.h/2)
+
  player.cd=2*60 -- 2s of cooldown ; 60 is fps/s
- sprite_set_state(player,2)
  player.life-=1
+
+ sprite_set_state(player,2)
 end
 
 -->8
@@ -249,8 +310,6 @@ function update_enemies()
   -- hit by enemy
   -- only when player not in cooldown
   if player.state!=2 and sprites_collide(e,player) then
-   sfx(3)
-   explode(e.x+e.w/2,e.y+e.h/2)
    remove_enemy(e)
    player_hit()
 
