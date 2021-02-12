@@ -46,7 +46,6 @@ end
 -- scenes
 
 function switch_scene(scene)
- printh(scene)
  current_scene=scene
  scenes[current_scene].init()
 end
@@ -85,10 +84,15 @@ function draw_game()
 end
 
 function init_over()
+ if bullets then
+  for b in all(bullets) do
+   remove_bullet(b)
+  end
+ end
 end
 
 function update_over()
- if btn(❎) then
+ if btn(🅾️) then
   switch_scene("game")
  end
 end
@@ -98,7 +102,54 @@ function draw_over()
  
  draw_stars()
  draw_sprites()
- draw_explosions()
+
+ color(0)
+
+ local rec={x1=10,y1=15,x2=118,y2=105}
+ rectfill(rec.x1-2,rec.y1-2,rec.x2+2,rec.y2+2,7)
+ rectfill(rec.x1,rec.y1,rec.x2,rec.y2,0)
+
+ color(14)
+
+ local str, tx, ty
+
+ str="you failed against boring"
+ tx=(128/2)-(#str*4/2)
+ ty=20
+ print(str,tx,ty)
+
+ str="and sad languages!"
+ tx=(128/2)-(#str*4/2)
+ ty+=10
+ print(str,tx,ty)
+
+ str="shame on you"
+ tx=(128/2)-(#str*4/2)
+ ty+=10
+ print(str,tx,ty)
+
+ str="your poor score is "
+ tx=(128/2)-(#str*4/2)
+ ty=60
+ print(str,tx,ty)
+
+ str=tostr(player.score)
+ tx=(128/2)-(#str*4/2)
+ ty+=10
+ print(str,tx,ty)
+
+ local en={1,2,3,1,2,3}
+ tx=(128/2)-(12*#en/2)
+
+ for i,e in pairs(en) do
+  local o=(i-1)*12
+
+  spr(e_prop[e].sp,tx+o,90)
+  spr(e_prop[e].sp,tx+o,90)
+  spr(e_prop[e].sp,tx+o,90)
+ end
+
+ color()
 end
 
 -->8
@@ -193,7 +244,11 @@ function player_hit()
  player.cd=2*60 -- 2s of cooldown ; 60 is fps/s
  player.life-=1
 
- sprite_set_state(player,2)
+ if player.life>0 then
+  sprite_set_state(player,2)
+ else
+  switch_scene("over")
+ end
 end
 
 -->8
