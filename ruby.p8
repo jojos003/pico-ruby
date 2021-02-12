@@ -196,11 +196,6 @@ function update_player()
  
  player.f=max(0,player.f-player.fv)
  
- -- spawn enemy for debug
- -- if btnp(🅾️) then
- --  spawn_enemy()
- -- end
- 
  if btnp(🅾️) then
   if current_scene=="game" then
    switch_scene("over")
