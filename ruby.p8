@@ -14,6 +14,11 @@ function _init()
 
  max_enemies=15
 
+ colors_prop={
+  bg=0,
+  txt=14
+ }
+
  -- game properties
  g_prop={
   x=0,
@@ -143,7 +148,7 @@ function update_title()
 end
 
 function draw_title()
- cls(0)
+ cls(colors_prop.bg)
 
  draw_stars()
 
@@ -174,7 +179,7 @@ function update_game()
 end
 
 function draw_game()
- cls(0)
+ cls(colors_prop.bg)
  
  draw_stars()
  draw_sprites()
@@ -210,7 +215,7 @@ function update_over()
 end
 
 function draw_over()
- cls(0)
+ cls(colors_prop.bg)
  
  draw_stars()
 
@@ -220,7 +225,7 @@ function draw_over()
  rectfill(rec.x1-2,rec.y1-2,rec.x2+2,rec.y2+2,7)
  rectfill(rec.x1,rec.y1,rec.x2,rec.y2,0)
 
- color(14)
+ color(colors_prop.txt)
 
  local str, tx, ty
 
