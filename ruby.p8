@@ -89,6 +89,16 @@ function init_over()
    remove_bullet(b)
   end
  end
+
+ over_enemies_screener={
+  f_enemy_prop('sw'),
+  f_enemy_prop('cs'),
+  f_enemy_prop('ts'),
+  f_enemy_prop('js'),
+  f_enemy_prop('ts'),
+  f_enemy_prop('cs'),
+  f_enemy_prop('sw')
+ }
 end
 
 function update_over()
@@ -138,15 +148,15 @@ function draw_over()
  ty+=10
  print(str,tx,ty)
 
- local en={1,2,3,4,3,2,1}
+ local en=over_enemies_screener
  tx=(128/2)-(12*#en/2)
 
  for i,e in pairs(en) do
   local o=(i-1)*12
 
-  spr(e_prop[e].sp,tx+o,90)
-  spr(e_prop[e].sp,tx+o,90)
-  spr(e_prop[e].sp,tx+o,90)
+  spr(e.sp,tx+o,90)
+  spr(e.sp,tx+o,90)
+  spr(e.sp,tx+o,90)
  end
 
  color()
@@ -291,7 +301,7 @@ function init_enemies()
 
  e_prop={
   {
-   n="swift",
+   n="sw",
    sp=6,
    v=0.35,
    life=10,
@@ -299,7 +309,7 @@ function init_enemies()
    freq=0.25
   },
   {
-   n="csharp",
+   n="cs",
    sp=8,
    v=0.48,
    life=8,
