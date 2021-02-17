@@ -81,6 +81,11 @@ function _init()
  }
 
  scenes={
+  title={
+   init=init_title,
+   update=update_title,
+   draw=draw_title
+  },
   game={
    init=init_game,
    update=update_game,
@@ -93,7 +98,9 @@ function _init()
   }
  }
 
- switch_scene("game")
+ init_stars()
+
+ switch_scene("title")
 end
 
 function _update60()
@@ -121,11 +128,36 @@ function switch_scene(scene)
  scenes[current_scene].init()
 end
 
-function init_game()
+function init_title()
  init_sprites()
-
- init_stars()
  init_player()
+end
+
+function update_title()
+ if btnp(🅾️) then
+  switch_scene("game")
+ end
+
+ update_stars()
+ update_sprites()
+end
+
+function draw_title()
+ cls(0)
+
+ draw_stars()
+
+ color(colors_prop.txt)
+
+ str="press 🅾️ to start"
+ tx=(g_prop.w/2)-(#str*4/2)
+ ty=20
+ print(str,tx,ty)
+
+ draw_sprites()
+end
+
+function init_game()
  init_enemies()
  init_bullets()
  init_explosions()
@@ -170,16 +202,17 @@ function init_over()
 end
 
 function update_over()
- if btn(🅾️) then
-  switch_scene("game")
+ if btnp(🅾️) then
+  switch_scene("title")
  end
+
+ update_stars()
 end
 
 function draw_over()
  cls(0)
  
  draw_stars()
- draw_sprites()
 
  color(0)
 
