@@ -24,7 +24,8 @@ function _init()
   x=0,
   w=128,
   y=0,
-  h=128
+  h=128,
+  ls=true -- lifes should be shown?
  }
 
  p_prop={
@@ -120,8 +121,11 @@ end
 
 function draw_score()
  print("score "..player.score,7)
- for l=0,player.life-1 do
-  spr(3,l*player.w+l*2,8)
+
+ if g_prop.ls then
+  for l=0,player.life-1 do
+   spr(3,l*player.w+l*2,8)
+  end
  end
 end
 
