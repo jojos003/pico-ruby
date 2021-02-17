@@ -7,6 +7,8 @@ __lua__
 #include tools.lua
 
 function _init()
+ cartdata("jojos003_pico-ruby_1")
+
  ticks=0
 
  sp_ruby={1,2,3,4}
@@ -17,6 +19,11 @@ function _init()
  colors_prop={
   bg=0,
   txt=14
+ }
+
+ -- catridge memory properties
+ m_prop={
+  hs=0 -- memory address for high score
  }
 
  -- game properties
@@ -111,6 +118,8 @@ function _init()
   ht=10   -- hide time
  }
 
+ high_score=dget(m_prop.hs)
+
  init_stars()
 
  switch_scene("title")
@@ -185,6 +194,18 @@ function draw_title()
   str="press 🅾️ to start"
   tx=(g_prop.w/2)-(#str*4/2)
   ty=20
+  print(str,tx,ty)
+ end
+
+ if high_score>0 then
+  str="high score"
+  tx=(g_prop.w/2)-(#str*4/2)
+  ty=40
+  print(str,tx,ty)
+
+  str=tostr(high_score)
+  tx=(g_prop.w/2)-(#str*4/2)
+  ty+=10
   print(str,tx,ty)
  end
 
@@ -381,6 +402,11 @@ function player_hit()
  if player.life>0 then
   sprite_set_state(player,2)
  else
+  if player.score>high_score then
+   high_score=player.score
+   dset(m_prop.hs,high_score)
+  end
+
   switch_scene("over")
  end
 end
