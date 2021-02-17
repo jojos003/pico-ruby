@@ -196,12 +196,6 @@ function update_player()
  
  player.f=max(0,player.f-player.fv)
  
- if btnp(🅾️) then
-  if current_scene=="game" then
-   switch_scene("over")
-  end
- end
-
  -- cooldown?
  if player.state==2 then
   player.cd-=1 -- decrement cooldown at each tick
