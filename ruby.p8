@@ -9,6 +9,77 @@ __lua__
 function _init()
  ticks=0
 
+ sp_ruby={1,2,3,4}
+ sp_bullet=16
+
+ max_enemies=15
+
+ -- game properties
+ g_prop={
+  x=0,
+  w=128,
+  y=0,
+  h=128
+ }
+
+ p_prop={
+  life=3, -- lifes
+  fv=0.2, -- fire velocity
+  cd=2*60 -- 2s of cooldown after hit ; 60 is fps/s
+ }
+
+ e_prop={
+  {
+   n="sw",
+   sp=6,
+   v=0.35,
+   life=10,
+   score=9,
+   freq=0.25
+  },
+  {
+   n="cs",
+   sp=8,
+   v=0.48,
+   life=8,
+   score=8,
+   freq=0.30
+  },
+  {
+   n="ts",
+   sp=9,
+   v=0.60,
+   life=7,
+   score=5,
+   freq=0.45
+  },
+  {
+   n="js",
+   sp=5,
+   v=0.50,
+   life=3,
+   score=3,
+   freq=0.50
+  },
+  {
+   n="php",
+   sp=7,
+   v=0.75,
+   life=1,
+   score=1,
+   freq=0.75
+  }
+ }
+
+ s_props={
+  c=7,
+  c_a=5,
+  v=0.25,
+  v_a=0.03,
+  m=90,
+  m_a=50
+ }
+
  scenes={
   game={
    init=init_game,
@@ -51,9 +122,6 @@ function switch_scene(scene)
 end
 
 function init_game()
- sp_ruby={1,2,3,4}
- sp_bullet=16
-
  init_sprites()
 
  init_stars()
@@ -124,32 +192,32 @@ function draw_over()
  local str, tx, ty
 
  str="you failed against boring"
- tx=(128/2)-(#str*4/2)
+ tx=(g_prop.w/2)-(#str*4/2)
  ty=20
  print(str,tx,ty)
 
  str="and sad languages!"
- tx=(128/2)-(#str*4/2)
+ tx=(g_prop.w/2)-(#str*4/2)
  ty+=10
  print(str,tx,ty)
 
  str="shame on you"
- tx=(128/2)-(#str*4/2)
+ tx=(g_prop.w/2)-(#str*4/2)
  ty+=10
  print(str,tx,ty)
 
  str="your poor score is "
- tx=(128/2)-(#str*4/2)
+ tx=(g_prop.w/2)-(#str*4/2)
  ty=60
  print(str,tx,ty)
 
  str=tostr(player.score)
- tx=(128/2)-(#str*4/2)
+ tx=(g_prop.w/2)-(#str*4/2)
  ty+=10
  print(str,tx,ty)
 
  local en=over_enemies_screener
- tx=(128/2)-(12*#en/2)
+ tx=(g_prop.w/2)-(12*#en/2)
 
  for i,e in pairs(en) do
   local o=(i-1)*12
@@ -168,14 +236,14 @@ end
 function init_player()
  player=build_sprite()
 
- player.x=128/2-8
+ player.x=g_prop.w/2-8
  player.y=100
  player.dx=player.x
  player.dy=player.y
  player.f=0 -- fire
- player.fv=0.2 -- fire vel
+ player.fv=p_prop.fv -- fire vel
  player.score=0
- player.life=3
+ player.life=p_prop.life
  player.state=1
 
  -- idle anim
@@ -232,15 +300,15 @@ function update_player()
   ny+=1
  end
  
- player.x=mid(0,nx,128-8)
- player.y=mid(0,ny,128-8)
+ player.x=mid(g_prop.x,nx,g_prop.w-8)
+ player.y=mid(g_prop.y,ny,g_prop.h-8)
 end
 
 function player_hit()
  sfx(3)
  explode(player.x+player.w/2,player.y+player.h/2)
 
- player.cd=2*60 -- 2s of cooldown ; 60 is fps/s
+ player.cd=p_prop.cd
  player.life-=1
 
  if player.life>0 then
@@ -262,8 +330,8 @@ function update_bullets()
   b.x+=b.vx
   b.y+=b.vy
   
-  if b.x<0 or b.x>128
-  or b.y<0 or b.y>128
+  if b.x<0 or b.x>g_prop.w
+  or b.y<0 or b.y>g_prop.h
   then
    remove_bullet(b)
   end
@@ -296,51 +364,6 @@ end
 
 function init_enemies()
  enemies={}
-
- max_enemies=15
-
- e_prop={
-  {
-   n="sw",
-   sp=6,
-   v=0.35,
-   life=10,
-   score=9,
-   freq=0.25
-  },
-  {
-   n="cs",
-   sp=8,
-   v=0.48,
-   life=8,
-   score=8,
-   freq=0.30
-  },
-  {
-   n="ts",
-   sp=9,
-   v=0.60,
-   life=7,
-   score=5,
-   freq=0.45
-  },
-  {
-   n="js",
-   sp=5,
-   v=0.50,
-   life=3,
-   score=3,
-   freq=0.50
-  },
-  {
-   n="php",
-   sp=7,
-   v=0.75,
-   life=1,
-   score=1,
-   freq=0.75
-  }
- }
 end
 
 function spawn_enemy(et,x,y)
@@ -379,7 +402,7 @@ function update_enemies()
  -- need to spawn enemy?
  if #enemies<max_enemies and ticks%30==0 then
   local e=next_enemies()
-  local x=mid(0,rnd(128),128-8)
+  local x=mid(0,rnd(g_prop.w),g_prop.w-8)
   local y=0
 
   spawn_enemy(e,x,y)
@@ -410,7 +433,7 @@ function update_enemies()
    sfx(2)
    explode(e.x+e.w/2,e.y+e.h/2)
    remove_enemy(e)
-   enemy_die(e)
+   enemy_died(e)
    player.score+=e.score
   end
 
@@ -420,7 +443,7 @@ function update_enemies()
   end
 
   -- out of map
-  if e.y>128 then
+  if e.y>g_prop.w then
    remove_enemy(e)
   end
  end
@@ -431,7 +454,7 @@ function remove_enemy(e)
  remove_sprite(e)
 end
 
-function enemy_die(e)
+function enemy_died(e)
  if e.n=='ts' then
   local js=f_enemy_prop('js')
 
@@ -461,22 +484,13 @@ function init_stars()
   alt={}
  }
  
- s_props={
-  c=7,
-  c_a=5,
-  v=0.25,
-  v_a=0.03,
-  m=90,
-  m_a=50
- }
- 
  for i=1,s_props.m do
   local star=spawn_star(false)
-  star.y=rnd(128)
+  star.y=rnd(g_prop.w)
  end
  for i=1,s_props.m_a do
   local star=spawn_star(true)
-  star.y=rnd(128)
+  star.y=rnd(g_prop.w)
  end
 end
 
@@ -485,7 +499,7 @@ function update_stars()
   for s in all(st) do
 	  s.y+=s.v
 	  
-	  if s.y>128 then
+	  if s.y>g_prop.w then
 	   del(st,s)
 	   spawn_star(s.alt)
 	  end
@@ -505,7 +519,7 @@ function spawn_star(alt)
  end
  
  local st={
-  x=flr(rnd(128)),
+  x=flr(rnd(g_prop.w)),
   y=-1,
   w=0.5,
   h=0.5,
