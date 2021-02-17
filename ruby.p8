@@ -104,6 +104,13 @@ function _init()
   }
  }
 
+ blink={
+  visible=true,
+  f=0,    -- current frame
+  vt=30,  -- visible time
+  ht=10   -- hide time
+ }
+
  init_stars()
 
  switch_scene("title")
@@ -111,6 +118,8 @@ end
 
 function _update60()
  ticks+=1
+
+ update_blink()
 
  scenes[current_scene].update()
 end
@@ -126,6 +135,20 @@ function draw_score()
   for l=0,player.life-1 do
    spr(3,l*player.w+l*2,8)
   end
+ end
+end
+
+function update_blink()
+ blink.f-=1
+
+ if (blink.f>0) return
+
+ if blink.visible then
+   blink.visible=false
+   blink.f=blink.ht
+ else
+   blink.visible=true
+   blink.f=blink.vt
  end
 end
 
@@ -158,10 +181,12 @@ function draw_title()
 
  color(colors_prop.txt)
 
- str="press 🅾️ to start"
- tx=(g_prop.w/2)-(#str*4/2)
- ty=20
- print(str,tx,ty)
+ if blink.visible then
+  str="press 🅾️ to start"
+  tx=(g_prop.w/2)-(#str*4/2)
+  ty=20
+  print(str,tx,ty)
+ end
 
  draw_sprites()
 end
