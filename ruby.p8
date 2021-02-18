@@ -312,15 +312,11 @@ function draw_over()
  ty+=10
  print(str,tx,ty)
 
- local en=over_enemies_screener
- tx=(g_prop.w/2)-(12*#en/2)
-
- for i,e in pairs(en) do
-  local o=(i-1)*12
-
-  spr(e.sp,tx+o,90)
-  spr(e.sp,tx+o,90)
-  spr(e.sp,tx+o,90)
+ if blink.visible then
+  str="press 🅾️ to title"
+  tx=(g_prop.w/2)-(#str*4/2)
+  ty=90
+  print(str,tx,ty)
  end
 
  color()
