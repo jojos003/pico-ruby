@@ -445,6 +445,10 @@ function fire()
 
  b.x=player.x
  b.y=player.y
+ b.bx=2
+ b.bw=4
+ b.by=0
+ b.bh=3
  b.vx=0
  b.vy=-3
  b.damage=1
