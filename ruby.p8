@@ -14,7 +14,7 @@ function _init()
  sp_ruby={1,2,3,4}
  sp_bullet=16
 
- max_enemies=15
+ max_enemies=20
 
  colors_prop={
   bg=0,
@@ -493,12 +493,14 @@ end
 
 function update_enemies()
  -- need to spawn enemy?
- if #enemies<max_enemies and ticks%30==0 then
-  local e=next_enemies()
-  local x=mid(0,rnd(g_prop.w),g_prop.w-8)
-  local y=0
+ if #enemies<max_enemies and ticks%25==0 then
+  for i=0,rnd(4) do
+   local e=next_enemies()
+   local x=mid(0,rnd(g_prop.w),g_prop.w-8)
+   local y=0
 
-  spawn_enemy(e,x,y)
+   spawn_enemy(e,x,y)
+  end
  end
 
  for e in all(enemies) do
