@@ -97,8 +97,8 @@ function _init()
   c_a=5,
   v=0.25,
   v_a=0.03,
-  m=90,
-  m_a=50
+  m=40,
+  m_a=20
  }
 
  scenes={
